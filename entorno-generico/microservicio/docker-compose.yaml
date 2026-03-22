@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  microservicio:
+    build: .
+    image: tucan/microservicio:latest
+    container_name: microservicio
+    restart: on-failure
+    environment:
+      - NATS_URL=nats://nats-jetstream:4222
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    networks:
+      red-pruebas:
+        aliases:
+          - microservicio
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+
+networks:
+  red-pruebas:
+    external: true

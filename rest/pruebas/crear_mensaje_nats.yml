@@ -1,0 +1,22 @@
+info:
+  name: crear_mensaje_nats
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:80/api/publicar
+  body:
+    type: json
+    data: |-
+      {
+        "mensaje": "Hola JetStream, este es mi primer mensaje persistente",
+        "topico": "mis_eventos.prueba1"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

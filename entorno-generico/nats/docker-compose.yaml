@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  nats-js:
+    image: nats:alpine
+    container_name: nats-jetstream
+    restart: unless-stopped
+    ports:
+      - "4222:4222"
+      - "8222:8222" 
+    volumes:
+      - ./nats-data:/data/jetstream 
+    command: ["-js", "-sd", "/data/jetstream", "-m", "8222", "-DV"]
+    networks:
+      red-pruebas:
+        aliases:
+          - nats-jetstream
+
+networks:
+  red-pruebas:
+    external: true

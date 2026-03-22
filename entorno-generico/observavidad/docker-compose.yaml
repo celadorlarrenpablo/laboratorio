@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin-server
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    networks:
+      red-pruebas:
+        aliases:
+          - zipkin
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-server
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      red-pruebas:
+        aliases:
+          - prometheus
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - red-pruebas
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - red-pruebas
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - red-pruebas
+
+networks:
+  red-pruebas:
+    external: true
