@@ -4,7 +4,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Service;
 
-import io.micrometer.tracing.Tracer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tucan.microservicio.observabilidad.NatsWrapper; // <-- ¡ESTE ES EL IMPORT QUE FALTABA!
+
 import io.nats.client.Connection;
 import io.nats.client.JetStream;
 import io.nats.client.Message;
@@ -19,28 +21,31 @@ import lombok.extern.slf4j.Slf4j;
 public class NatsPublisher {
 
     private final Connection natsConnection;
-    private final Tracer tracer;
-
-    public void publishMessage(String subject, String payload) {
+    private final ObjectMapper objectMapper;
+    private final NatsWrapper natsWrapper;
+    
+    public void publishMessage(String subject, Object payload) {
         try {
             JetStream js = natsConnection.jetStream();
             
-            Headers headers = new Headers();
-            if (tracer.currentTraceContext().context() != null) {
-                headers.put("b3", tracer.currentTraceContext().context().traceId()); 
-            }
+            // 1. Delegamos la creación de cabeceras de monitorización al Wrapper
+            Headers headers = natsWrapper.injectTracingHeaders(new Headers());
 
+            // 2. Convertimos a JSON
+            String jsonPayload = objectMapper.writeValueAsString(payload);
+
+            // 3. Montamos y enviamos el mensaje
             Message msg = NatsMessage.builder()
                     .subject(subject)
                     .headers(headers)
-                    .data(payload.getBytes(StandardCharsets.UTF_8))
+                    .data(jsonPayload.getBytes(StandardCharsets.UTF_8))
                     .build();
 
             js.publish(msg);
-            log.info("Mensaje publicado en {}. Payload: {}", subject, payload);
+            log.info("Mensaje JSON publicado en {}. Payload: {}", subject, jsonPayload);
             
         } catch (Exception e) {
-            log.error("Error al publicar en NATS JetStream", e);
+            log.error("Error al publicar JSON en NATS JetStream", e);
         }
     }
 }

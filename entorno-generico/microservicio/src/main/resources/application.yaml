@@ -30,5 +30,8 @@ springdoc:
     path: /swagger-ui.html
 
 logging:
+  level:
+    root: WARN
+    com.tucan.microservicio: INFO
   pattern:
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+    console: "%5p | Mensaje: %m | Clase: %logger | Metodo: %M | [Traza: %X{traceId:-}]%n"

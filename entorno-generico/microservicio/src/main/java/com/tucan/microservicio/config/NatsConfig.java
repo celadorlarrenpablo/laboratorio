@@ -19,7 +19,7 @@ public class NatsConfig {
 
     @Value("${nats.url:nats://localhost:4222}")
     private String natsUrl;
-
+    
     @Bean
     public Connection natsConnection() throws IOException, InterruptedException {
         Options options = new Options.Builder()
