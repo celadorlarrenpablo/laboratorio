@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  subscriber:
+    build: .
+    image: tucan/subscriber:v1
+    restart: on-failure
+    environment:
+      - NATS_URL=nats://nats-jetstream:4222
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080-8180:8080"
+    networks:
+      red-pruebas:
+        aliases:
+          - subscriber
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 400M
+
+networks:
+  red-pruebas:
+    external: true

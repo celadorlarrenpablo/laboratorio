@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  microservicio:
+  publisher:
     build: .
-    image: tucan/microservicio:v1
+    image: tucan/publisher:v1
     restart: on-failure
     environment:
       - NATS_URL=nats://nats-jetstream:4222
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
       - SPRING_PROFILES_ACTIVE=prod
     ports:
-      - "8080-8082:8080"
+      - "8080-8180:8080"
     networks:
       red-pruebas:
         aliases:
-          - microservicio
+          - publisher
     deploy:
       replicas: 1
       resources:
